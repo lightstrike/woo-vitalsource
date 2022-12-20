@@ -1,0 +1,6 @@
+vendor
+node_modules
+build/*
+.env
+!.env.sample
+codeception.yml
