@@ -1,0 +1,25 @@
+{
+    "name": "lightstrike/woo-vitalsource",
+    "description": "Integrates VitalSource API w/ WooCommerce to provide seller's content in the VS store.",
+    "type": "wordpress-plugin",
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.5",
+        "wp-coding-standards/wpcs": "^2.3"
+    },
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Geoff Taylor",
+            "email": "geoff@axistaylor.com"
+        }
+    ],
+    "config": {
+        "optimize-autoloader": true,
+        "process-timeout": 0,
+        "sort-packages": true
+    },
+    "scripts": {
+        "lint": "vendor/bin/phpcs -vp .",
+        "fix": "vendor/bin/phpcbf -vp ."
+    }
+}
