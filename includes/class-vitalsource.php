@@ -111,7 +111,7 @@ class VitalSource {
 			$product->set_name( $title ); // product title.
 			$product->set_slug( $slug );
 			$product->set_sold_individually( true );
-			$product->set_regular_price( $price ); // in current shop currency.
+			$product->set_regular_price( ! empty( $price ) ? $price : woo_vitalsource_get_setting( 'default_chapter_price' ) ); // in current shop currency.
 			$product->update_meta_data( 'vbid', $vbid );
 
 			if ( ! empty( $sku ) ) {

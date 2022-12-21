@@ -113,6 +113,14 @@ class Settings {
 					'type'    => 'checkbox',
 					'default' => 'off',
 				],
+				[
+					'name'        => 'default_chapter_price',
+					'label'       => __( 'Default Price', 'woo-vitalsource' ),
+					'desc'        => __( 'Default Price of Chapters', 'woo-vitalsource' ),
+					'type'        => 'text',
+					'default'     => '',
+					'placeholder' => '1.00'
+				],
 			]
 		);
 
