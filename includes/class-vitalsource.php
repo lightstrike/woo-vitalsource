@@ -377,6 +377,49 @@ class VitalSource {
 	}
 
 	/**
+	 * Redirect URL to sampling of specified content for provided sku.
+	 *
+	 * @param string $access_token  User access token.
+	 * @param string $sku  Content  SKU.
+	 * @return string|false
+	 */
+	public function vs_fulfillment_sampling( $access_token, $sku ) {
+		// Bail if no API key.
+		$api_key = $this->get_api_key();
+		if ( ! $api_key ) {
+			return false;
+		}
+
+		$response = wp_remote_post(
+			'https://api.vitalsource.com/v4/fulfillments',
+			[
+				'headers' => [
+					'X-VitalSource-API-Key'      => $api_key,
+					'X-VitalSource-Access-Token' => $access_token,
+					'Content-Type'               => 'application/json',
+				],
+				'body'    => wp_json_encode(
+					[
+						'fulfillment' => [
+							'sku'       => $sku,
+							'term'      => 'Perpetual',
+							'code-type' => 'pub_sample',
+							'tag'       => 'instructor_sample',
+						],
+					]
+				),
+			]
+		);
+
+		$fulfillment = json_decode( \wp_remote_retrieve_body( $response ), true );
+		if ( ! empty( $fulfillment ) && ! empty( $fulfillment['code'] ) ) {
+			return $fulfillment['code'];
+		}
+
+		return false;
+	}
+
+	/**
 	 * Queries VS Bookshelf for all products.
 	 *
 	 * @return array

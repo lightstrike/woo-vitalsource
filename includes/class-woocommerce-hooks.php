@@ -91,10 +91,33 @@ class WooCommerce_Hooks {
 			);
 		}
 
+		$user          = wp_get_current_user();
+		$role          = (array) $user->roles;
+		$is_instructor = in_array( $role[0], [ 'instructor' ], true );	
+
 		$access_token = $vs_instance->vs_check_credentials();
 		if ( false !== $access_token ) {
 			$license = $vs_instance->vs_check_content_license( $access_token, $product->get_sku() );
 			if ( false !== $license ) {
+				self::$vs_content_link = $vs_instance->vs_redirects( $access_token, $product->get_meta( 'vbid', true ) );
+				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
+				add_action(
+					'woocommerce_single_product_summary',
+					[ $this, 'vs_view_content_button' ],
+					30
+				);
+				return;
+			}
+		}
+
+		if ( $is_instructor ) {
+			if ( false === $access_token ) {
+				$access_token = $vs_instance->vs_create_user_credentials();
+			}
+
+			$code    = $vs_instance->vs_fulfillment_sampling( $access_token, $product->get_sku() );
+			$success = $vs_instance->vs_redeem_code( $access_token, $code );
+			if ( false !== $success ) {
 				self::$vs_content_link = $vs_instance->vs_redirects( $access_token, $product->get_meta( 'vbid', true ) );
 				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
 				add_action(
