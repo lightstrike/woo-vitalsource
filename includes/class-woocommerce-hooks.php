@@ -34,6 +34,7 @@ class WooCommerce_Hooks {
 			10,
 			2
 		);
+		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'woocommerce_cart_calculate_fees' ), 30, 6 );
 	}
 
 	/**
@@ -93,7 +94,7 @@ class WooCommerce_Hooks {
 
 		$user          = wp_get_current_user();
 		$role          = (array) $user->roles;
-		$is_instructor = in_array( $role[0], [ 'instructor' ], true );	
+		$is_instructor = in_array( $role[0], [ 'instructor' ], true );
 
 		$access_token = $vs_instance->vs_check_credentials();
 		if ( false !== $access_token ) {
@@ -173,13 +174,38 @@ class WooCommerce_Hooks {
 	/**
 	 * Callback for executed after a successful purchase.
 	 *
-	 * @param mixed $result
-	 * @param int $order_id
+	 * @param mixed $result    Resulting order.
+	 * @param int   $order_id  Order ID.
 	 * @return mixed
 	 */
 	public function handle_successful_purchase( $result, $order_id ) {
 		$this->vs_give_user_access_to_any_purchased_content( $order_id );
 
 		return $result;
+	}
+
+	/**
+	 * Applies platform fee to cart total.
+	 *
+	 * @return void
+	 */
+	public function woocommerce_cart_calculate_fees() {
+		if ( \is_admin() && ! defined( 'DOING_AJAX' ) ) {
+			return;
+		}
+
+		$platform_fee = woo_vitalsource_get_setting( 'platform_fee' );
+		if ( empty( $platform_fee ) ) {
+			$platform_fee = 0.15;
+		}
+
+		$fee_amount = 0;
+		foreach ( \WC()->cart->get_cart_contents() as $cart_item_key => $values ) {
+			$fee_amount += floatval( $values['line_subtotal'] ) * $platform_fee;
+		}
+
+		if ( 0 < $fee_amount ) {
+			\WC()->cart->add_fee( __( 'Platform fee: ', 'woo-vitalsource' ), $fee_amount );
+		}
 	}
 }

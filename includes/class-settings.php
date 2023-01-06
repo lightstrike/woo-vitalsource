@@ -119,7 +119,15 @@ class Settings {
 					'desc'        => __( 'Default Price of Chapters', 'woo-vitalsource' ),
 					'type'        => 'text',
 					'default'     => '',
-					'placeholder' => '1.00'
+					'placeholder' => '1.00',
+				],
+				[
+					'name'        => 'platform_fee',
+					'label'       => __( 'Platform Fee Percentage', 'woo-vitalsource' ),
+					'desc'        => __( 'An extra fee applied at checkout.', 'woo-vitalsource' ),
+					'type'        => 'float',
+					'default'     => '',
+					'placeholder' => '0.15',
 				],
 			]
 		);
