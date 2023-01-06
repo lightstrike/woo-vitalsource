@@ -120,7 +120,7 @@ class VitalSource {
 
 			if ( ! empty( $vs_product['resource_links']['cover_image'] ) ) {
 				$image_url     = $vs_product['resource_links']['cover_image'];
-				$attachment_id = woo_vitalsource_upload_image( $image_url );
+				$attachment_id = woo_vitalsource_upload_image( $image_url, $slug . '-cover' );
 				$product->set_image_id( $attachment_id );
 			}
 
@@ -130,7 +130,7 @@ class VitalSource {
 		$only_vs_products = woo_vitalsource_get_setting( 'only_vs_products' );
 		if ( 'on' === $only_vs_products ) {
 			$query_args    = [
-				'limit' => -1,
+				'limit'   => -1,
 				'exclude' => $saved,
 			];
 			$product_query = new \WC_Product_Query( $query_args );

@@ -47,16 +47,17 @@ function woo_vitalsource_get_setting( string $option_name, $default = '' ) {
  * Uploads an image by URL to WordPress
  *
  * @param string $image_url  URL to image.
+ * @param string $slug       slug for image.
  *
  * @return int
  */
-function woo_vitalsource_upload_image( $image_url ) {
+function woo_vitalsource_upload_image( $image_url, $slug ) {
 	//phpcs:disable WordPress.WP.AlternativeFunctions
 	include_once ABSPATH . 'wp-admin/includes/image.php';
 	$url        = $image_url;
 	$parts      = explode( '/', getimagesize( $url )['mime'] );
 	$image_type = end( $parts );
-	$uniq_name  = gmdate( 'dmY' ) . '' . (int) microtime( true );
+	$uniq_name  = $slug . gmdate( 'dmY' );
 	$filename   = $uniq_name . '.' . $image_type;
 
 	$upload_dir  = wp_upload_dir();
