@@ -93,8 +93,8 @@ class WooCommerce_Hooks {
 		}
 
 		$user          = wp_get_current_user();
-		$role          = (array) $user->roles;
-		$is_instructor = in_array( $role[0], [ 'instructor' ], true );
+		$roles         = (array) $user->roles;
+		$is_instructor = in_array( 'instructor', $roles, true );
 
 		$access_token = $vs_instance->vs_check_credentials();
 		if ( false !== $access_token ) {
@@ -116,8 +116,7 @@ class WooCommerce_Hooks {
 				$access_token = $vs_instance->vs_create_user_credentials();
 			}
 
-			$code    = $vs_instance->vs_fulfillment_sampling( $access_token, $product->get_sku() );
-			$success = $vs_instance->vs_redeem_code( $access_token, $code );
+			$success = $vs_instance->vs_fulfillment_sampling( $access_token, $product->get_sku() );
 			if ( false !== $success ) {
 				self::$vs_content_link = $vs_instance->vs_redirects( $access_token, $product->get_meta( 'vbid', true ) );
 				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
