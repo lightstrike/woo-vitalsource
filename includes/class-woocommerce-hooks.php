@@ -34,7 +34,8 @@ class WooCommerce_Hooks {
 			10,
 			2
 		);
-		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'woocommerce_cart_calculate_fees' ), 30, 6 );
+		add_action( 'woocommerce_cart_calculate_fees', [ $this, 'woocommerce_cart_calculate_fees' ], 30, 6 );
+		add_action( 'woocommerce_thankyou', [ $this, 'redirect_to_chapter' ] );
 	}
 
 	/**
@@ -102,6 +103,7 @@ class WooCommerce_Hooks {
 			if ( false !== $license ) {
 				self::$vs_content_link = $vs_instance->vs_redirects( $access_token, $product->get_meta( 'vbid', true ) );
 				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
+				remove_action( 'sc_get_download_pdf', 'sc_show_download_link' );
 				add_action(
 					'woocommerce_single_product_summary',
 					[ $this, 'vs_view_content_button' ],
@@ -206,5 +208,27 @@ class WooCommerce_Hooks {
 		if ( 0 < $fee_amount ) {
 			\WC()->cart->add_fee( __( 'Platform fee: ', 'woo-vitalsource' ), $fee_amount );
 		}
+	}
+
+	/**
+	 * Redirects user back to recently purchased product page.
+	 *
+	 * @param int $order_id  Order ID.
+	 * @return void
+	 */
+	public function redirect_to_chapter( $order_id ) {
+		$order = \wc_get_order( $order_id );
+		if ( $order->has_status( 'failed' ) ) {
+			return;
+		}
+
+		$items = $order->get_items();
+		if ( empty( $items ) ) {
+			return;
+		}
+
+		$product = array_pop( $items )->get_product();
+		wp_safe_redirect( $product->get_permalink() );
+
 	}
 }
