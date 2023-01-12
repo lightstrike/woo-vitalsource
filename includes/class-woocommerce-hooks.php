@@ -103,7 +103,9 @@ class WooCommerce_Hooks {
 			if ( false !== $license ) {
 				self::$vs_content_link = $vs_instance->vs_redirects( $access_token, $product->get_meta( 'vbid', true ) );
 				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
-				remove_action( 'sc_get_download_pdf', 'sc_show_download_link' );
+				if ( ! $is_instructor && ! current_user_can( 'manage_options' ) ) {
+					remove_action( 'sc_get_download_pdf', 'sc_show_download_link' );
+				}
 				add_action(
 					'woocommerce_single_product_summary',
 					[ $this, 'vs_view_content_button' ],
