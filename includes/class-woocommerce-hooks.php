@@ -45,7 +45,7 @@ class WooCommerce_Hooks {
 	 */
 	public function vs_register_to_purchase_button() {
 		$button_text = __( 'Register to Purchase', 'woo-vitalsource' );
-		$button_link = esc_attr( wp_registration_url() );
+		$button_link = esc_attr( home_url( '/#register' ) );
 		$classname   = esc_attr( 'single_add_to_cart_button button alt' . ( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ) );
 
 		// Display button.
