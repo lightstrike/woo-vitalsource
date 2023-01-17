@@ -73,7 +73,7 @@ class WooCommerce_Hooks {
 	 * @param integer $customer_ids  Customer ID.
 	 * @return bool
 	 */
-	private function bought_item_recently( $product_ids, $customer_ids ) {
+	private function bought_item_recently( $product_ids, $customer_id ) {
 		$bought = false;
 
 		// Set HERE ine the array your specific target product IDs.
@@ -81,7 +81,7 @@ class WooCommerce_Hooks {
 		// Get all customer orders.
 		$customer_orders = get_posts(
 			[
-				'numberposts' => -1,
+				'numberposts' => 1,
 				'meta_key'    => '_customer_user', // WPCS: slow query ok.
 				'meta_value'  => $customer_id, // WPCS: slow query ok.
 				'post_type'   => 'shop_order', // WC orders post type.
@@ -96,8 +96,8 @@ class WooCommerce_Hooks {
 		);
 		foreach ( $customer_orders as $customer_order ) {
 			// Updated compatibility with WooCommerce 3+.
-			$order_id = method_exists( $order, 'get_id' ) ? $order->get_id() : $order->id;
 			$order    = wc_get_order( $customer_order );
+			$order_id = method_exists( $order, 'get_id' ) ? $order->get_id() : $order->id;
 
 			// Iterating through each current customer products bought in the order.
 			foreach ( $order->get_items() as $item ) {
@@ -166,7 +166,7 @@ class WooCommerce_Hooks {
 			}
 		}
 
-		$already_purchased_item = bought_item_recently( [ $product->get_id() ], $user->ID );
+		$already_purchased_item = $this->bought_item_recently( [ $product->get_id() ], $user->ID );
 		if ( $is_instructor || $already_purchased_item ) {
 			if ( false === $access_token ) {
 				$access_token = $vs_instance->vs_create_user_credentials();
