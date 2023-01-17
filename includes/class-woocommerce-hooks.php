@@ -45,11 +45,11 @@ class WooCommerce_Hooks {
 	 */
 	public function vs_register_to_purchase_button() {
 		$button_text = __( 'Register to Purchase', 'woo-vitalsource' );
-		$button_link = esc_attr( home_url( '/#register' ) );
-		$classname   = esc_attr( 'single_add_to_cart_button button alt' . ( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ) );
+		$button_link = home_url( '/#register' );
+		$classname   = 'single_add_to_cart_button button alt' . ( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' );
 
 		// Display button.
-		echo '<div class="cart"><a class="' . $classname . '" href="' . $button_link . '">' . $button_text . '</a></div>';
+		echo '<div class="cart"><a class="' . esc_attr( $classname ) . '" href="' . esc_attr( $button_link ) . '">' . esc_attr( $button_text ) . '</a></div>';
 	}
 
 	/**
@@ -59,11 +59,62 @@ class WooCommerce_Hooks {
 	 */
 	public function vs_view_content_button() {
 		$button_text = __( 'Read Chapter', 'woo-vitalsource' );
-		$button_link = esc_attr( self::$vs_content_link );
-		$classname   = esc_attr( 'single_add_to_cart_button button alt' . ( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ) );
+		$button_link = self::$vs_content_link;
+		$classname   = 'single_add_to_cart_button button alt' . ( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' );
 
 		// Display button.
-		echo '<div class="cart"><a class="' . $classname . '" href="' . $button_link . '">' . $button_text . '</a></div>';
+		echo '<div class="cart"><a class="' . esc_attr( $classname ) . '" href="' . esc_attr( $button_link ) . '">' . esc_attr( $button_text ) . '</a></div>';
+	}
+
+	/**
+	 * Return true if customer purchased product recently.
+	 *
+	 * @param array   $product_ids   Product IDs.
+	 * @param integer $customer_ids  Customer ID.
+	 * @return bool
+	 */
+	private function bought_item_recently( $product_ids, $customer_ids ) {
+		$bought = false;
+
+		// Set HERE ine the array your specific target product IDs.
+
+		// Get all customer orders.
+		$customer_orders = get_posts(
+			[
+				'numberposts' => -1,
+				'meta_key'    => '_customer_user', // WPCS: slow query ok.
+				'meta_value'  => $customer_id, // WPCS: slow query ok.
+				'post_type'   => 'shop_order', // WC orders post type.
+				'post_status' => 'wc-completed', // Only orders with status "completed".
+				'date'        => [
+					[
+						'after'     => 'January 5th, 2023',
+						'inclusive' => true,
+					],
+				],
+			]
+		);
+		foreach ( $customer_orders as $customer_order ) {
+			// Updated compatibility with WooCommerce 3+.
+			$order_id = method_exists( $order, 'get_id' ) ? $order->get_id() : $order->id;
+			$order    = wc_get_order( $customer_order );
+
+			// Iterating through each current customer products bought in the order.
+			foreach ( $order->get_items() as $item ) {
+				// WC 3+ compatibility.
+				if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+					$product_id = $item['product_id'];
+				} else {
+					$product_id = $item->get_product_id();
+				}
+
+				// Your condition related to your 2 specific products Ids.
+				if ( in_array( $product_id, $product_ids, true ) ) {
+					$bought = true;
+				}
+			}
+		}
+		return $bought;
 	}
 
 	/**
@@ -115,7 +166,8 @@ class WooCommerce_Hooks {
 			}
 		}
 
-		if ( $is_instructor ) {
+		$already_purchased_item = bought_item_recently( [ $product->get_id() ], $user->ID );
+		if ( $is_instructor || $already_purchased_item ) {
 			if ( false === $access_token ) {
 				$access_token = $vs_instance->vs_create_user_credentials();
 			}
