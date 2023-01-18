@@ -69,8 +69,8 @@ class WooCommerce_Hooks {
 	/**
 	 * Return true if customer purchased product recently.
 	 *
-	 * @param array   $product_ids   Product IDs.
-	 * @param integer $customer_ids  Customer ID.
+	 * @param array   $product_ids  Product IDs.
+	 * @param integer $customer_id  Customer ID.
 	 * @return bool
 	 */
 	private function bought_item_recently( $product_ids, $customer_id ) {
@@ -142,6 +142,7 @@ class WooCommerce_Hooks {
 				[ $this, 'vs_register_to_purchase_button' ],
 				30
 			);
+			return;
 		}
 
 		$user          = wp_get_current_user();
@@ -154,6 +155,7 @@ class WooCommerce_Hooks {
 			if ( false !== $license ) {
 				self::$vs_content_link = $vs_instance->vs_redirects( $access_token, $product->get_meta( 'vbid', true ) );
 				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
+				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 30 );
 				if ( ! $is_instructor && ! current_user_can( 'manage_options' ) ) {
 					remove_action( 'sc_get_download_pdf', 'sc_show_download_link' );
 				}
@@ -176,6 +178,7 @@ class WooCommerce_Hooks {
 			if ( false !== $success ) {
 				self::$vs_content_link = $vs_instance->vs_redirects( $access_token, $product->get_meta( 'vbid', true ) );
 				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
+				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 30 );
 				add_action(
 					'woocommerce_single_product_summary',
 					[ $this, 'vs_view_content_button' ],
